@@ -1,0 +1,3 @@
+[submodule "agents/openhands_agent-sdk"]
+	path = agents/openhands_agent-sdk
+	url = https://github.com/OpenHands/software-agent-sdk.git
