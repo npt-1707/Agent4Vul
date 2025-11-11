@@ -1,0 +1,1 @@
+Tokens: ↑ input 3.83M • cache hit 94.15% • reasoning 13.26K • ↓ output 39.17K • $ 2.5100

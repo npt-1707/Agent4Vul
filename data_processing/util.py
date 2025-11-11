@@ -28,6 +28,13 @@ def pull_repo(repo_dir: str) -> None:
     if returncode != 0:
         raise Exception(f"Error pulling repository {cmd}: {err}")
 
+def checkout_to_commit(repo_dir: str, commit_hash: str) -> None:
+    """Checks out the specified commit in the given git repository directory."""
+    cmd = f"git checkout {commit_hash}"
+    out, err, returncode = exec_command(cmd, cwd=repo_dir)
+    if returncode != 0:
+        raise Exception(f"Error checking out commit {commit_hash}: {err}")
+
 def load_jsonl(file_path: str) -> list:
     """Loads a JSONL file and returns a list of dictionaries."""
     data = []

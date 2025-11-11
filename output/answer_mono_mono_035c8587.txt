@@ -1,0 +1,34 @@
+Based on my analysis of the function at commit 035c8587c0d8d307e45f1b7171a0d337bb451f1e, here is my assessment:
+
+'''Vulnerable: Yes
+
+Explanation: The `ves_icall_System_Array_FastCopy` function contains an **integer overflow vulnerability** in the multiplication operations `element_size * length` at lines 753 and 792.
+
+**Root Cause:**
+- Line 716: `int element_size;` is declared as a signed 32-bit integer
+- Line 714: `int length` parameter is also a signed 32-bit integer  
+- Line 752: `element_size = mono_array_element_size(...)` returns `gint32` (signed 32-bit)
+- Lines 753 & 792: The product `element_size * length` can overflow the 32-bit range
+
+**Vulnerability Mechanism:**
+When copying arrays with large element sizes and many elements, the multiplication can overflow. For example:
+- If element_size = 65,536 (0x10000) bytes
+- And length = 65,536 (0x10000) elements
+- The product should be 4,294,967,296 bytes (4GB)
+- But in signed 32-bit arithmetic, this wraps to 0
+
+This causes:
+1. **Line 753**: `memset(..., element_size * length)` to zero fewer bytes than intended, leaving uninitialized memory
+2. **Line 792**: `memmove(..., element_size * length)` to copy fewer bytes than intended, resulting in incomplete data transfer
+
+**Security Impact:**
+1. **Information Disclosure**: When memset doesn't properly zero the destination array, it may contain uninitialized memory from previous allocations that could expose sensitive data
+2. **Data Corruption**: When memmove copies fewer bytes than intended, the destination array contains incomplete or garbage data
+
+**Verification:**
+This vulnerability was fixed in January 2019 (commits 9d550f4e374 and 5998117b9e2) which addressed issue #12344 by casting `element_size` to `size_t` before multiplication:
+```c
+mono_gc_memmove_atomic(dest_addr, source_addr, (size_t)element_size * length);
+```
+
+The vulnerability existed for approximately 8 years (2011-2019).'''

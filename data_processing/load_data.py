@@ -22,9 +22,11 @@ def load_ReposVul_dataset(start_idx: int=0, end_idx: int=100) -> list:
         if not dest_dir.exists():
             base_dir = dest_dir.parent
             base_dir.mkdir(parents=True, exist_ok=True)
+            print(f"Cloning repository {clone_url} to {str(base_dir)}...")
             clone_repo(clone_url, str(base_dir))
-        else:
-            pull_repo(str(dest_dir))
+        # else:
+        #     print(f"Repository already cloned at {str(dest_dir)}, pulling latest changes...")
+        #     pull_repo(str(dest_dir))
         # Store the absolute path to the cloned repo
         item["local_repo_path"] = str(dest_dir)
     return data
@@ -40,4 +42,4 @@ def get_ReposVul_dataitem_vuln_func(item: dict) -> list:
 
 def get_ReposVul_dataitem_commit_hash(item: dict) -> str:
     """Extracts the commit hash from a ReposVul dataset item."""
-    return item["url"].split("/")[-1]
+    return item["parents"][0]["commit_id_before"]
